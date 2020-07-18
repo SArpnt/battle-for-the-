@@ -3,8 +3,8 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 var cSprites = [
-	new sprite.player(64, 160),
-	new sprite.enemy(96, 160)
+	new sprite.Player(64, 160),
+	new sprite.Enemy(96, 160)
 ];
 
 let step;

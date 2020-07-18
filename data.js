@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 var scrollX = 0;
 var scrollY = 0;
 
@@ -143,14 +143,14 @@ const tile = [
 		onCollide: function (side, pos, s) {
 			if (side == 'down') {
 				level[pos.y][pos.x] = 0;
-				cSprites.push(new sprite.tile.bump(pos.x, pos.y, 10, side));
+				cSprites.push(new sprite.tile.Bump(pos.x, pos.y, 10, side));
 			}
 		}
 	}
 ];
 
 const sprite = {
-	player: class {
+	Player: class {
 		constructor(x, y) {
 			this.pos = {
 				x: x,
@@ -193,7 +193,7 @@ const sprite = {
 				else if (i < ((this.scrollState == -1) ? 184 : 72))
 					this.scroll(-1, 184);
 			}
-			cSprites.push(new sprite.test(this.pos.x, this.pos.y + 8));
+			cSprites.push(new sprite.particle.Star(this.pos.x, this.pos.y + 8));
 		}
 
 		scroll(state, a) {
@@ -212,7 +212,7 @@ const sprite = {
 		}
 
 	},
-	enemy: class {
+	Enemy: class {
 		constructor(x, y) {
 			this.pos = {
 				x: x,
@@ -242,26 +242,28 @@ const sprite = {
 				this.dir = !this.dir;
 		}
 	},
-	test: class {
-		constructor(x, y) {
-			this.pos = {
-				x: x,
-				y: y
-			};
-			this.timer = 0;
-			this.img = getImg('sprite', 'test');
-		}
-		update(sN) {
-			if (this.timer >= 5) {
-				cSprites.splice(sN, 1);
-				return;
+	particle: {
+		Star: class {
+			constructor(x, y) {
+				this.pos = {
+					x: x,
+					y: y,
+				};
+				this.timer = 0;
+				this.img = getImg('sprite', 'test');
 			}
-			//this.img.style = "opacity:" + (1 - (this.timer / 10))
-			this.timer++;
+			update(sN) {
+				if (this.timer >= 5) {
+					cSprites.splice(sN, 1);
+					return;
+				}
+				//this.img.style = "opacity:" + (1 - (this.timer / 10))
+				this.timer++;
+			}
 		}
 	},
 	tile: {
-		bump: class {
+		Bump: class {
 			constructor(x, y, t, side) {
 				this.pos = {
 					tx: x,
