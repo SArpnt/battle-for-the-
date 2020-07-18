@@ -1,5 +1,6 @@
-var scrollX = 0
-var scrollY = 0
+'use strict'
+var scrollX = 0;
+var scrollY = 0;
 
 var compressedLevel = {
 	x: 27,
@@ -22,23 +23,23 @@ var compressedLevel = {
 		{ id: 2, x: 6, y: 5 },
 		{ id: 10, x: 13, y: 4 }
 	]
-}
+};
 function loadLevel(data, background = 0) {
-	var level = []
+	var level = [];
 	for (let y = 0; y < data.y; y++)
-		level.push(Object.assign([], Array(data.x).fill(background)))
+		level.push(Object.assign([], Array(data.x).fill(background)));
 	for (let i = 0; i < data.tiles.length; i++) {
-		let rect = data.tiles[i]
-		if (rect.xe === undefined) rect.xe = rect.x
-		if (rect.ye === undefined) rect.ye = rect.y
+		let rect = data.tiles[i];
+		if (rect.xe === undefined) rect.xe = rect.x;
+		if (rect.ye === undefined) rect.ye = rect.y;
 		for (let y = rect.y; y <= rect.ye; y++)
 			for (let x = rect.x; x <= rect.xe; x++)
-				level[y][x] = rect.id
+				level[y][x] = rect.id;
 	}
-	return level
+	return level;
 }
-var level = loadLevel(compressedLevel)
-console.log(level)
+var level = loadLevel(compressedLevel);
+console.log(level);
 
 const tile = [
 	{
@@ -141,12 +142,12 @@ const tile = [
 		},
 		onCollide: function (side, pos, s) {
 			if (side == 'down') {
-				level[pos.y][pos.x] = 0
-				cSprites.push(new sprite.tile.bump(pos.x, pos.y, 10, side))
+				level[pos.y][pos.x] = 0;
+				cSprites.push(new sprite.tile.bump(pos.x, pos.y, 10, side));
 			}
 		}
 	}
-]
+];
 
 const sprite = {
 	player: class {
@@ -162,52 +163,52 @@ const sprite = {
 					left: false,
 					right: false
 				}
-			}
-			this.scrollState = 0 //1 is right
-			this.img = getImg('sprite', 'player')
+			};
+			this.scrollState = 0; //1 is right
+			this.img = getImg('sprite', 'player');
 		}
 
 		update(sN) {
-			this.pos.last = Object.assign({}, this.pos)
-			delete this.pos.last.last
-			this.pos = sScript.move(this.pos, keyInput)
-			this.pos = sScript.collide(this.pos)
+			this.pos.last = Object.assign({}, this.pos);
+			delete this.pos.last.last;
+			this.pos = sScript.move(this.pos, keyInput);
+			this.pos = sScript.collide(this.pos);
 
 			{
 				if ((() => {
 					switch (this.scrollState) { //reset scrolling when changing direction partly
 						case 1:
-							return this.pos.xv < 0
+							return this.pos.xv < 0;
 						case -1:
-							return this.pos.xv > 0
+							return this.pos.xv > 0;
 						default:
-							return false
+							return false;
 					}
-				})()) this.scrollState = 0
+				})()) this.scrollState = 0;
 
-				let i = this.pos.x + scrollX //player relative to camera
+				let i = this.pos.x + scrollX; //player relative to camera
 
 				if (i > ((this.scrollState == 1) ? 120 : 232)) //past scroll border
-					this.scroll(1, 120)
+					this.scroll(1, 120);
 				else if (i < ((this.scrollState == -1) ? 184 : 72))
-					this.scroll(-1, 184)
+					this.scroll(-1, 184);
 			}
-			cSprites.push(new sprite.test(this.pos.x, this.pos.y + 8))
+			cSprites.push(new sprite.test(this.pos.x, this.pos.y + 8));
 		}
 
 		scroll(state, a) {
-			this.scrollState = state
+			this.scrollState = state;
 
 			scrollX += (//scroll camera to final position based on movement
 				(a - this.pos.x - scrollX) //final camera position
-					> 0 ? Math.max : Math.min)(this.pos.xv * -2.5, 0)
+					> 0 ? Math.max : Math.min)(this.pos.xv * -2.5, 0);
 
 			if (//jitter fix
 				state == 1 ?
 					this.pos.x + scrollX < a :
 					this.pos.x + scrollX > a
 			)
-				scrollX = a - this.pos.x
+				scrollX = a - this.pos.x;
 		}
 
 	},
@@ -224,21 +225,21 @@ const sprite = {
 					left: false,
 					right: false
 				}
-			}
-			this.dir = true //true = right
-			this.img = getImg('sprite', 'enemy')
+			};
+			this.dir = true; //true = right
+			this.img = getImg('sprite', 'enemy');
 		}
 
 		update(sN) {
-			this.pos.last = Object.assign({}, this.pos)
-			delete this.pos.last.last
+			this.pos.last = Object.assign({}, this.pos);
+			delete this.pos.last.last;
 			this.pos = sScript.move(this.pos,
 				{ up: false, down: false, left: !this.dir, right: this.dir, sprint: false }
-			)
+			);
 
-			this.pos = sScript.collide(this.pos)
+			this.pos = sScript.collide(this.pos);
 			if (this.pos.collisions.right || this.pos.collisions.left)
-				this.dir = !this.dir
+				this.dir = !this.dir;
 		}
 	},
 	test: class {
@@ -246,17 +247,17 @@ const sprite = {
 			this.pos = {
 				x: x,
 				y: y
-			}
-			this.timer = 0
-			this.img = getImg('sprite', 'test')
+			};
+			this.timer = 0;
+			this.img = getImg('sprite', 'test');
 		}
 		update(sN) {
 			if (this.timer >= 5) {
-				cSprites.splice(sN, 1)
-				return
+				cSprites.splice(sN, 1);
+				return;
 			}
 			//this.img.style = "opacity:" + (1 - (this.timer / 10))
-			this.timer++
+			this.timer++;
 		}
 	},
 	tile: {
@@ -269,30 +270,29 @@ const sprite = {
 					y: y * 16,
 					sy: y * 16,
 					yv: -1.5
-				}
-				this.tile = t
-				this.side = side
-				this.img = tile[t].img
+				};
+				this.tile = t;
+				this.side = side;
+				this.img = tile[t].img;
 			}
 			update(sN) {
-				var p = this.pos
-				p.y += p.yv
-				p.yv += 0.2
+				var p = this.pos;
+				p.y += p.yv;
+				p.yv += 0.2;
 				if (p.y == p.sy) {
-					level[p.ty][p.tx] = this.tile
-					cSprites.splice(sN, 1)
+					level[p.ty][p.tx] = this.tile;
+					cSprites.splice(sN, 1);
 				}
 			}
 		}
 	}
-}
+};
 
 function getImg(type, img) {
-	let i = document.createElement('img')
-	i.src = "assets/" + type + "/" + img + '.png'
-	return i
+	let i = document.createElement('img');
+	i.src = `assets/${type}/${img}.png`;
+	return i;
 }
 
-for (let x in tile) {
-	tile[x].img = getImg('tile', tile[x].name)
-}
+for (let t of tile)
+	t.img = getImg('tile', t.name);
