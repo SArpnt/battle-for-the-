@@ -32,7 +32,7 @@ let draw;
 		drawSprites(scrollX, scrollY);
 
 		let now = performance.now();
-		fpsElem[0].innerHTML = Math.round(1000 / (now - fpsC)); // fps counter
+		fpsElem.innerHTML = Math.round(1000 / (now - fpsC)); // fps counter
 		fpsC = now;
 
 		requestAnimationFrame(draw);
