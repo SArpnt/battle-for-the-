@@ -10,8 +10,9 @@ var sScript = {
 
 		var push = {
 			gen: function (xy, rev, dir) { // rev stands for reverse
-				return function (pos, tile) {
-					let i = Math[rev ? 'ceil' : 'floor'](pos[xy] / 16) * 16;
+				const TS = xy == 'x' ? TILE_WIDTH : TILE_HEIGHT;
+				return function (pos, tile, tpos) {
+					let i = Math[rev ? 'ceil' : 'floor'](pos[xy] / TS) * TS;
 					if (
 						(rev ? pos : pos.last)[xy] <= i &&
 						(rev ? pos.last : pos)[xy] >= i
@@ -19,7 +20,7 @@ var sScript = {
 						pos[xy] = i;
 						pos[xy + 'v'] = 0;
 						collisions[dir] = true;
-						if (tile.onCollide) tile.onCollide(dir, tile.pos, null);
+						if (tile.onCollide) tile.onCollide(dir, tpos, null);
 					}
 					return pos;
 				};
@@ -31,20 +32,19 @@ var sScript = {
 		push.right = push.gen('x', true, 'right');
 
 		function pushif(dir, xo, yo) {
-			let tI = sScript.getTile(pos.x + xo, pos.y + yo);
-			if (tI.collide[dir]) {
-				pos = push[dir](pos, tI);
-			}
+			let t = sScript.getTile(pos.x + (xo * TILE_WIDTH), pos.y + (yo * TILE_HEIGHT), true);
+			if (t.tile.collide && (typeof t.tile.collide != 'object' || t.tile.collide[dir]))
+				pos = push[dir](pos, t.tile, t.pos);
 		}
 
 		var pushlist = [
-			['up', 16, 16],
-			['up', 0, 16],
-			['down', 16, 0],
+			['up', 1, 1],
+			['up', 0, 1],
+			['down', 1, 0],
 			['down', 0, 0],
-			['left', 16, 16],
-			['left', 16, 0],
-			['right', 0, 16],
+			['left', 1, 1],
+			['left', 1, 0],
+			['right', 0, 1],
 			['right', 0, 0]
 		];
 
@@ -96,14 +96,40 @@ var sScript = {
 		return pos;
 	},
 
-	getTile(x, y) {
-		if (x <= 0 || y <= 0) return tile[0]; // offscreen
-		let tPos = { x: Math.floor(x / 16), y: Math.floor(y / 16) };
-		let i = tile[level
-		[tPos.y]
-		[tPos.x]];
-		if (!i) return tile[0]; // offscreen
-		i.pos = tPos;
-		return i;
-	}
+	convertCoords(x, y, s) {
+		if (s) return { x: x * TILE_WIDTH, y: y * TILE_HEIGHT }; // tile to sprite
+		else return { x: Math.floor(x / TILE_WIDTH), y: Math.floor(y / TILE_HEIGHT) }; // sprite to tile
+	},
+
+	getTile(x, y, s = false, d = 0) {
+		let p;
+		if (s) p = sScript.convertCoords(x, y, false); // sprite coords
+		else p = { x, y }; // tile coords
+
+		let t;
+		if (
+			p.x >= 0 &&
+			p.y >= 0 &&
+			p.x < level.width &&
+			p.y < level.height
+		) t = tile[level.tiles[p.y][p.x]];
+		else t = tile[0]
+		return { tile: t, pos: { x: p.x, y: p.y } };
+	},
+
+	setTile(x, y, t, s = false) {
+		let p;
+		if (s) p = sScript.convertCoords(x, y, false); // sprite coords
+		else p = { x, y }; // tile coords
+
+		if (
+			p.x >= 0 &&
+			p.y >= 0 &&
+			p.x < level.width &&
+			p.y < level.height
+		) {
+			level.tiles[p.y][p.x] = t;
+			return true;
+		} else return false;
+	},
 };

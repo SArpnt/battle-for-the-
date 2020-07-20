@@ -14,19 +14,20 @@ let draw;
 	let fpsC = performance.now();
 	const tpsElem = document.getElementById('tps');
 	const fpsElem = document.getElementById('fps');
+
 	step = function () {
 		runSprites();
 
-		scrollX = Math.round(Math.max(Math.min(scrollX, 0), (level[0].length * -16) + 320)); // keep scrolling in boundaries and round
-		scrollY = Math.round(Math.max(Math.min(scrollY, 0), (level.length * -16) + 240));
+		scrollX = Math.round(Math.max(Math.min(scrollX, 0), (level.width * -TILE_WIDTH) + canvas.width)); // keep scrolling in boundaries and round
+		scrollY = Math.round(Math.max(Math.min(scrollY, 0), (level.height * -TILE_HEIGHT) + canvas.height));
 
 		let now = performance.now();
 		tpsElem.innerHTML = Math.round(1000 / (now - tpsC));
 		tpsC = now;
 	};
 	draw = function () {
-		ctx.fillStyle = "magenta";
-		ctx.fillRect(0, 0, 640, 480); // temporary sky
+		ctx.fillStyle = "magenta"; // temporary bg
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 		drawTiles(scrollX, scrollY);
 		drawSprites(scrollX, scrollY);
@@ -37,30 +38,42 @@ let draw;
 
 		requestAnimationFrame(draw);
 	};
-}
 
-function runSprites() {
-	for (let sN in cSprites) // sN is spriteNumber
-		cSprites[sN].update(sN);
-}
-
-function drawSprites(ox, oy) {
-	for (let sprite of cSprites)
-		ctx.drawImage(
-			sprite.img,
-			(Math.round(sprite.pos.x) + ox) * 2,
-			(Math.round(sprite.pos.y) + oy) * 2
-		);
-}
-
-function drawTiles(ox, oy) {
-	for (let y in level)
-		for (let x in level[y])
+	function runSprites() {
+		for (let sN in cSprites) // sN is spriteNumber
+			cSprites[sN].update(sN);
+	}
+	function drawSprites(ox, oy) {
+		for (let s of cSprites)
 			ctx.drawImage(
-				tile[level[y][x]].img,
-				(x * 16 + ox) * 2,
-				(y * 16 + oy) * 2
+				assets[s.img[0]],
+				s.img[1] * TILE_WIDTH,
+				s.img[2] * TILE_HEIGHT,
+				s.img[3] * TILE_WIDTH,
+				s.img[4] * TILE_HEIGHT,
+				Math.round(s.pos.x) + ox,
+				Math.round(s.pos.y) + oy,
+				s.img[3] * TILE_WIDTH,
+				s.img[4] * TILE_HEIGHT,
 			);
+	}
+	function drawTiles(ox, oy) {
+		for (let y = 0; y < level.height; y++)
+			for (let x = 0; x < level.width; x++) {
+				let t = sScript.getTile(x, y, false).tile;
+				ctx.drawImage(
+					assets[t.img[0]],
+					t.img[1] * TILE_WIDTH,
+					t.img[2] * TILE_HEIGHT,
+					TILE_WIDTH,
+					TILE_HEIGHT,
+					x * TILE_WIDTH + ox,
+					y * TILE_HEIGHT + oy,
+					TILE_WIDTH,
+					TILE_HEIGHT,
+				);
+			}
+	}
 }
 
 var keyInput = {

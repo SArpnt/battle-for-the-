@@ -1,10 +1,13 @@
 'use strict';
-var scrollX = 0;
-var scrollY = 0;
+const TILE_WIDTH = 16;
+const TILE_HEIGHT = 16;
 
-var compressedLevel = {
-	x: 27,
-	y: 15,
+var assets = {};
+
+let compressedLevel = {
+	width: 27,
+	height: 15,
+	assets: [0, 1],
 	tiles: [
 		{ id: 1, x: 0, y: 0, xe: 6, ye: 14 },
 		{ id: 1, x: 7, y: 12, xe: 21, ye: 14 },
@@ -24,44 +27,57 @@ var compressedLevel = {
 		{ id: 10, x: 13, y: 4 }
 	]
 };
-function loadLevel(data, background = 0) {
-	var level = [];
-	for (let y = 0; y < data.y; y++)
-		level.push(Object.assign([], Array(data.x).fill(background)));
-	for (let i = 0; i < data.tiles.length; i++) {
-		let rect = data.tiles[i];
-		if (rect.xe === undefined) rect.xe = rect.x;
-		if (rect.ye === undefined) rect.ye = rect.y;
-		for (let y = rect.y; y <= rect.ye; y++)
-			for (let x = rect.x; x <= rect.xe; x++)
-				level[y][x] = rect.id;
-	}
-	return level;
+let Level;
+{
+	function ndArray(bg, ...dim) {
+		if (dim.length) {
+			let a = [],
+				l = dim[0],
+				d = dim.slice(1);
+			for (let i = 0; i < l; i++)
+				a.push(ndArray(bg, ...d));
+			return a;
+		} else
+			return bg;
+	};
+	Level = function (data, bg = 0) {
+		this.width = data.width;
+		this.height = data.height;
+		this.assets = data.assets;
+
+		for (let s of data.assets)
+			if (!assets[s]) {
+				let i = document.createElement('img');
+				i.src = `assets/${s}.png`;
+				document.getElementById('assets').appendChild(i);
+				assets[s] = i;
+			}
+
+		this.tiles = ndArray(bg, this.height, data.width);
+		for (let rect of data.tiles) {
+			rect.xe = rect.xe || rect.x;
+			rect.ye = rect.ye || rect.y;
+			for (let y = rect.y; y <= rect.ye; y++)
+				for (let x = rect.x; x <= rect.xe; x++)
+					this.tiles[y][x] = rect.id;
+		}
+	};
 }
-var level = loadLevel(compressedLevel);
-console.log(level);
+var level = new Level(compressedLevel);
 
 const tile = [
 	{
 		name: 'empty',
-		collide: {
-			up: false,
-			down: false,
-			left: false,
-			right: false
-		}
+		img: [1, 0, 0],
 	},
 	{
 		name: 'dirt',
-		collide: {
-			up: false,
-			down: false,
-			left: false,
-			right: false
-		}
+		img: [1, 2, 1],
+		collide: false,
 	},
 	{
 		name: 'floor',
+		img: [1, 2, 0],
 		collide: {
 			up: true,
 			down: false,
@@ -71,6 +87,7 @@ const tile = [
 	},
 	{
 		name: 'ceiling',
+		img: [1, 2, 2],
 		collide: {
 			up: false,
 			down: true,
@@ -80,6 +97,7 @@ const tile = [
 	},
 	{
 		name: 'Rwall',
+		img: [1, 3, 1],
 		collide: {
 			up: false,
 			down: false,
@@ -89,6 +107,7 @@ const tile = [
 	},
 	{
 		name: 'Lwall',
+		img: [1, 1, 1],
 		collide: {
 			up: false,
 			down: false,
@@ -98,6 +117,7 @@ const tile = [
 	},
 	{
 		name: 'RUcorner',
+		img: [1, 3, 0],
 		collide: {
 			up: true,
 			down: false,
@@ -107,6 +127,7 @@ const tile = [
 	},
 	{
 		name: 'LUcorner',
+		img: [1, 1, 1],
 		collide: {
 			up: true,
 			down: false,
@@ -116,6 +137,7 @@ const tile = [
 	},
 	{
 		name: 'RDcorner',
+		img: [1, 3, 2],
 		collide: {
 			up: false,
 			down: true,
@@ -125,6 +147,7 @@ const tile = [
 	},
 	{
 		name: 'LDcorner',
+		img: [1, 1, 2],
 		collide: {
 			up: false,
 			down: true,
@@ -134,20 +157,19 @@ const tile = [
 	},
 	{
 		name: 'bumpBox',
-		collide: {
-			up: true,
-			down: true,
-			left: true,
-			right: true
-		},
-		onCollide: function (side, pos, s) {
+		img: [1, 0, 1],
+		collide: true,
+		onCollide(side, pos, s) {
 			if (side == 'down') {
-				level[pos.y][pos.x] = 0;
+				sScript.setTile(pos.x, pos.y, 0, false);
 				cSprites.push(new sprite.tile.Bump(pos.x, pos.y, 10, side));
 			}
 		}
 	}
 ];
+
+var scrollX = 0;
+var scrollY = 0;
 
 const sprite = {
 	Player: class {
@@ -165,7 +187,7 @@ const sprite = {
 				}
 			};
 			this.scrollState = 0; //1 is right
-			this.img = getImg('sprite', 'player');
+			this.img = [0, 0, 0, 1, 1];
 		}
 
 		update(sN) {
@@ -227,7 +249,7 @@ const sprite = {
 				}
 			};
 			this.dir = true; //true = right
-			this.img = getImg('sprite', 'enemy');
+			this.img = [0, 1, 0, 1, 1];
 		}
 
 		update(sN) {
@@ -250,7 +272,7 @@ const sprite = {
 					y: y,
 				};
 				this.timer = 0;
-				this.img = getImg('sprite', 'test');
+				this.img = [0, 2, 0, 1, 1];
 			}
 			update(sN) {
 				if (this.timer >= 5) {
@@ -266,35 +288,26 @@ const sprite = {
 		Bump: class {
 			constructor(x, y, t, side) {
 				this.pos = {
-					tx: x,
-					ty: y,
-					x: x * 16,
-					y: y * 16,
-					sy: y * 16,
+					tilex: x,
+					tiley: y,
+					x: x * TILE_WIDTH,
+					y: y * TILE_HEIGHT,
+					sy: y * TILE_HEIGHT,
 					yv: -1.5
 				};
 				this.tile = t;
 				this.side = side;
-				this.img = tile[t].img;
+				this.img = tile[t].img.concat([1, 1]);
 			}
 			update(sN) {
 				var p = this.pos;
 				p.y += p.yv;
 				p.yv += 0.2;
 				if (p.y == p.sy) {
-					level[p.ty][p.tx] = this.tile;
+					sScript.setTile(p.tilex, p.tiley, this.tile, false);
 					cSprites.splice(sN, 1);
 				}
 			}
 		}
 	}
 };
-
-function getImg(type, img) {
-	let i = document.createElement('img');
-	i.src = `assets/${type}/${img}.png`;
-	return i;
-}
-
-for (let t of tile)
-	t.img = getImg('tile', t.name);
