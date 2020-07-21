@@ -1,9 +1,11 @@
 <html>
 
 <head>
+	<script src="script.js"></script>
+	<script src="sScript.js"></script>
 </head>
 
-<body>
+<body onload="start()">
 	<div style="display: flex; flex-direction: row; max-width: 100%;">
 		<canvas id="canvas" width="320" height="240" style="width: 640; height: 480; image-rendering: pixelated;"></canvas>
 		<div id="assets" style="background: darkmagenta; display: flex; flex-direction: column; flex-wrap: wrap;"></div>
@@ -11,9 +13,7 @@
 	<div>FPS: <span id="fps"></span></div>
 	<div>TPS: <span id="tps"></span></div>
 
-	<script src="sScript.js"></script>
 	<script src="data.js"></script>
-	<script src="script.js"></script>
 </body>
 
 </html>
