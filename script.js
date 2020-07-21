@@ -3,7 +3,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 var cSprites = [
-	new sprite.Player(64, 150),
+	new sprite.Player(64, 100),
 	new sprite.Enemy(96, 160)
 ];
 

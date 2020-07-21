@@ -127,7 +127,7 @@ const tile = [
 	},
 	{
 		name: 'LUcorner',
-		img: [1, 1, 1],
+		img: [1, 1, 0],
 		collide: {
 			up: true,
 			down: false,
