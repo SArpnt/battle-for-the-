@@ -8,6 +8,10 @@ let compressedLevel = {
 	width: 27,
 	height: 15,
 	assets: [0, 1],
+	sprites: [
+		['Player', 64, 152],
+		['Enemy', 96, 160],
+	],
 	tiles: [
 		{ id: 1, x: 0, y: 0, xe: 6, ye: 14 },
 		{ id: 1, x: 7, y: 12, xe: 21, ye: 14 },
@@ -43,6 +47,7 @@ let Level;
 	Level = function (data, bg = 0) {
 		this.width = data.width;
 		this.height = data.height;
+		this.sprites = data.sprites;
 		this.assets = data.assets;
 
 		for (let s of data.assets)

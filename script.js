@@ -2,10 +2,9 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
-var cSprites = [
-	new sprite.Player(64, 100),
-	new sprite.Enemy(96, 160)
-];
+var cSprites = [];
+for (let s of level.sprites)
+	cSprites.push(new (s[0].split('.').reduce((a, b) => a[b], sprite))(...s.slice(1)));
 
 let step;
 let draw;
