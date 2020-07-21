@@ -3,7 +3,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 var cSprites = [
-	new sprite.Player(64, 160),
+	new sprite.Player(64, 150),
 	new sprite.Enemy(96, 160)
 ];
 
@@ -47,14 +47,14 @@ let draw;
 		for (let s of cSprites)
 			ctx.drawImage(
 				assets[s.img[0]],
-				s.img[1] * TILE_WIDTH,
-				s.img[2] * TILE_HEIGHT,
-				s.img[3] * TILE_WIDTH,
-				s.img[4] * TILE_HEIGHT,
+				s.img[1],
+				s.img[2],
+				s.img[3],
+				s.img[4],
 				Math.round(s.pos.x) + ox,
 				Math.round(s.pos.y) + oy,
-				s.img[3] * TILE_WIDTH,
-				s.img[4] * TILE_HEIGHT,
+				s.img[3],
+				s.img[4],
 			);
 	}
 	function drawTiles(ox, oy) {

@@ -184,10 +184,18 @@ const sprite = {
 					down: false,
 					left: false,
 					right: false
-				}
+				},
+				hitboxes: [
+					{
+						x: 0,
+						y: 0,
+						width: 16,
+						height: 24,
+					}
+				],
 			};
 			this.scrollState = 0; //1 is right
-			this.img = [0, 0, 0, 1, 1];
+			this.img = [0, 0, 0, 16, 24];
 		}
 
 		update(sN) {
@@ -215,7 +223,7 @@ const sprite = {
 				else if (i < ((this.scrollState == -1) ? 184 : 72))
 					this.scroll(-1, 184);
 			}
-			cSprites.push(new sprite.particle.Star(this.pos.x, this.pos.y + 8));
+			cSprites.push(new sprite.particle.Star(this.pos.x + 4, this.pos.y + 20));
 		}
 
 		scroll(state, a) {
@@ -246,10 +254,18 @@ const sprite = {
 					down: false,
 					left: false,
 					right: false
-				}
+				},
+				hitboxes: [
+					{
+						x: 0,
+						y: 0,
+						width: 16,
+						height: 16,
+					}
+				],
 			};
 			this.dir = true; //true = right
-			this.img = [0, 1, 0, 1, 1];
+			this.img = [0, 16, 0, 16, 16];
 		}
 
 		update(sN) {
@@ -272,7 +288,7 @@ const sprite = {
 					y: y,
 				};
 				this.timer = 0;
-				this.img = [0, 2, 0, 1, 1];
+				this.img = [0, 32, 0, 8, 8];
 			}
 			update(sN) {
 				if (this.timer >= 5) {
@@ -288,8 +304,8 @@ const sprite = {
 		Bump: class {
 			constructor(x, y, t, side) {
 				this.pos = {
-					tilex: x,
-					tiley: y,
+					tx: x,
+					ty: y,
 					x: x * TILE_WIDTH,
 					y: y * TILE_HEIGHT,
 					sy: y * TILE_HEIGHT,
@@ -297,14 +313,15 @@ const sprite = {
 				};
 				this.tile = t;
 				this.side = side;
-				this.img = tile[t].img.concat([1, 1]);
+				let i = tile[t].img;
+				this.img = [i[0], i[1] * TILE_WIDTH, i[2] * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT];
 			}
 			update(sN) {
 				var p = this.pos;
 				p.y += p.yv;
 				p.yv += 0.2;
 				if (p.y == p.sy) {
-					sScript.setTile(p.tilex, p.tiley, this.tile, false);
+					sScript.setTile(p.tx, p.ty, this.tile, false);
 					cSprites.splice(sN, 1);
 				}
 			}

@@ -11,8 +11,8 @@ var sScript = {
 		var push = {
 			gen: function (xy, rev, dir) { // rev stands for reverse
 				const TS = xy == 'x' ? TILE_WIDTH : TILE_HEIGHT;
-				return function (pos, tile, tpos) {
-					let i = Math[rev ? 'ceil' : 'floor'](pos[xy] / TS) * TS;
+				return function (pos, hpos, tile, tpos) {
+					let i = Math[rev ? 'ceil' : 'floor']((pos[xy] + hpos[xy]) / TS) * TS - hpos[xy];
 					if (
 						(rev ? pos : pos.last)[xy] <= i &&
 						(rev ? pos.last : pos)[xy] >= i
@@ -31,22 +31,21 @@ var sScript = {
 		push.left = push.gen('x', false, 'left');
 		push.right = push.gen('x', true, 'right');
 
-		function pushif(dir, xo, yo) {
-			let t = sScript.getTile(pos.x + (xo * TILE_WIDTH), pos.y + (yo * TILE_HEIGHT), true);
+		function pushif(dir, x, y) {
+			let t = sScript.getTile(pos.x + x, pos.y + y, true);
 			if (t.tile.collide && (typeof t.tile.collide != 'object' || t.tile.collide[dir]))
-				pos = push[dir](pos, t.tile, t.pos);
+				pos = push[dir](pos, { x, y }, t.tile, t.pos);
 		}
 
-		var pushlist = [
-			['up', 1, 1],
-			['up', 0, 1],
-			['down', 1, 0],
-			['down', 0, 0],
-			['left', 1, 1],
-			['left', 1, 0],
-			['right', 0, 1],
-			['right', 0, 0]
-		];
+		let pushlist = [];
+		for (let h of pos.hitboxes) {
+			for (let x = h.x; x < h.width; x += TILE_WIDTH)
+				pushlist.push(['down', x, h.y], ['up', x, h.height]);
+			pushlist.push(['down', h.width, h.y], ['up', h.width, h.height]);
+			for (let y = h.y; y < h.height; y += TILE_HEIGHT)
+				pushlist.push(['right', h.x, y], ['left', h.width, y]);
+			pushlist.push(['right', h.x, h.height], ['left', h.width, h.height]);
+		}
 
 		for (let p of pushlist)
 			pushif(...p);
@@ -113,7 +112,7 @@ var sScript = {
 			p.x < level.width &&
 			p.y < level.height
 		) t = tile[level.tiles[p.y][p.x]];
-		else t = tile[0]
+		else t = tile[0];
 		return { tile: t, pos: { x: p.x, y: p.y } };
 	},
 
