@@ -1,6 +1,6 @@
 'use strict';
 var sScript = {
-	collide(pos) {
+	collide(pos, cPos = true, cVel = cPos, tCol = cPos || cVel) {
 		var collisions = {
 			up: false,
 			down: false,
@@ -17,10 +17,10 @@ var sScript = {
 						(rev ? pos : pos.last)[xy] <= i &&
 						(rev ? pos.last : pos)[xy] >= i
 					) {
-						pos[xy] = i;
-						pos[xy + 'v'] = 0;
+						if (cPos) pos[xy] = i;
+						if (cVel) pos[xy + 'v'] = 0;
 						collisions[dir] = true;
-						if (tile.onCollide) tile.onCollide(dir, tpos, null);
+						if (tCol && tile.onCollide) tile.onCollide(dir, tpos, null);
 					}
 					return pos;
 				};
