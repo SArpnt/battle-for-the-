@@ -1,14 +1,34 @@
 <html>
 
 <head>
-	<script src="script.js"></script>
-	<script src="sScript.js"></script>
+	<script src="https://cdn.jsdelivr.net/gh/SArpnt/tile-platformer-engine@latest/script.js"></script>
+	<script src="https://cdn.jsdelivr.net/gh/SArpnt/tile-platformer-engine@latest/sScript.js"></script>
+	<style>
+		.pixel {
+			image-rendering: pixelated;
+		}
+		.flex-column {
+			display: flex;
+			flex-direction: column;
+			flex-wrap: wrap;
+		}
+	</style>
 </head>
 
-<body onload="start()">
+<body onload="start({
+	zoom: 2,
+	canvas: document.getElementById('canvas'),
+	tps: document.getElementById('tps'),
+	fps: document.getElementById('fps'),
+	asset: document.getElementById('asset'),
+	tile: document.getElementById('tile'),
+	sprite: document.getElementById('sprite'),
+})">
 	<div style="display: flex; flex-direction: row; max-width: 100%;">
-		<canvas id="canvas" width="320" height="240" style="width: 640; height: 480; image-rendering: pixelated;"></canvas>
-		<div id="assets" style="background: darkmagenta; display: flex; flex-direction: column; flex-wrap: wrap;"></div>
+		<canvas id="canvas" width="320" height="240" class="pixel"></canvas>
+		<div id="asset" class="pixel flex-column" style="background: darkmagenta;"></div>
+		<div id="tile" class="pixel flex-column" style="background: darkred;"></div>
+		<div id="sprite" class="pixel flex-column" style="background: darkorange;"></div>
 	</div>
 	<div>FPS: <span id="fps"></span></div>
 	<div>TPS: <span id="tps"></span></div>
