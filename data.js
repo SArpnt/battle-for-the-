@@ -194,11 +194,11 @@ sprite = {
 					}
 				})()) this.scrollState = 0;
 
-				let i = this.pos.x + scrollX; // player relative to camera
+				let i = (this.pos.x + scrollX) / ctx.canvas.width; // player screen position from 0-1
 
-				if (i > ((this.scrollState == 1) ? 120 : 232)) // past scroll border
+				if (i > ((this.scrollState == 1) ? .375 : .75)) // past scroll border
 					this.scroll(1, 120);
-				else if (i < ((this.scrollState == -1) ? 184 : 72))
+				else if (i < ((this.scrollState == -1) ? .625 : .25))
 					this.scroll(-1, 184);
 			}
 			if (keyInput.sprint) fireGun.call(this, 1, 6, .05);
@@ -209,7 +209,7 @@ sprite = {
 
 			scrollX += ( // scroll camera to final position based on movement
 				(a - this.pos.x - scrollX) // final camera position
-					> 0 ? Math.max : Math.min)(this.pos.xv * -2.5, 0);
+					> 0 ? Math.max : Math.min)(this.pos.xv * -1.4, 0);
 
 			if ( // jitter fix
 				state == 1 ?
