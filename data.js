@@ -9,7 +9,6 @@ compressedLevel = {
 	sprites: [
 		['Player', 64, 152],
 		['Enemy', 96, 160],
-		['Bullet', 64, 160, 2, 3],
 	],
 	tiles: [
 		{ id: 1, x: 0, y: 0, xe: 13, ye: 29 },
@@ -177,10 +176,10 @@ sprite = {
 			this.img = [0, 0, 0, 16, 24];
 		}
 
-		update(sN) {
+		update(dt, sN) {
 			this.pos.last = Object.assign({}, this.pos);
 			delete this.pos.last.last;
-			this.pos = sScript.move(this.pos, keyInput);
+			this.pos = sScript.move(this.pos, dt, keyInput);
 			this.pos = sScript.collide(this.pos);
 
 			{
@@ -242,10 +241,10 @@ sprite = {
 			this.img = [0, 0, 24, 24, 16];
 		}
 
-		update(sN) {
+		update(dt, sN) {
 			this.pos.last = Object.assign({}, this.pos);
 			delete this.pos.last.last;
-			this.pos = sScript.move(this.pos,
+			this.pos = sScript.move(this.pos, dt,
 				{ up: false, down: false, left: !this.dir, right: this.dir, sprint: false }
 			);
 
@@ -255,7 +254,7 @@ sprite = {
 		}
 	},
 	Bullet: class {
-		constructor(x, y, dir, speed = 3) {
+		constructor(x, y, dir, speed = .5) {
 			this.pos = {
 				x: x,
 				y: y,
@@ -265,14 +264,14 @@ sprite = {
 			this.timer = 0;
 			this.img = [0, 32, 0, 8, 8];
 		}
-		update(sN) {
-			this.pos.x += this.pos.xv;
-			this.pos.y += this.pos.yv;
-			if (this.timer >= 500) {
+		update(dt, sN) {
+			this.pos.x += dt * this.pos.xv;
+			this.pos.y += dt * this.pos.yv;
+			if (this.timer >= 4000) {
 				cSprites.splice(sN, 1);
 				return;
 			}
-			this.timer++;
+			this.timer += dt;
 		}
 	},
 	particle: {
@@ -285,13 +284,13 @@ sprite = {
 				this.timer = 0;
 				this.img = [0, 32, 0, 8, 8];
 			}
-			update(sN) {
-				if (this.timer >= 5) {
+			update(dt, sN) {
+				if (this.timer >= 200) {
 					cSprites.splice(sN, 1);
 					return;
 				}
 				//this.img.style = "opacity:" + (1 - (this.timer / 10))
-				this.timer++;
+				this.timer += dt;
 			}
 		}
 	},
@@ -304,18 +303,18 @@ sprite = {
 					x: x * TILE_WIDTH,
 					y: y * TILE_HEIGHT,
 					sy: y * TILE_HEIGHT,
-					yv: -1.5
+					yv: -.6
 				};
 				this.tile = t;
 				this.side = side;
 				let i = tile[t].img;
 				this.img = [i[0], i[1] * TILE_WIDTH, i[2] * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT];
 			}
-			update(sN) {
+			update(dt, sN) {
 				var p = this.pos;
 				p.y += p.yv;
-				p.yv += 0.2;
-				if (p.y == p.sy) {
+				p.yv += .01 * dt;
+				if (p.y >= p.sy) {
 					sScript.setTile(p.tx, p.ty, this.tile, false);
 					cSprites.splice(sN, 1);
 				}
