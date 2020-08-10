@@ -1,32 +1,35 @@
 'use strict';
-TILE_WIDTH = 16;
-TILE_HEIGHT = 16;
+TILE_WIDTH = 8;
+TILE_HEIGHT = 8;
 
 compressedLevel = {
-	width: 27,
-	height: 15,
+	width: 54,
+	height: 30,
 	assets: [0, 1],
 	sprites: [
 		['Player', 64, 152],
 		['Enemy', 96, 160],
+		['Bullet', 64, 160, 2, 3],
 	],
 	tiles: [
-		{ id: 1, x: 0, y: 0, xe: 6, ye: 14 },
-		{ id: 1, x: 7, y: 12, xe: 21, ye: 14 },
-		{ id: 0, x: 4, y: 7, xe: 6, ye: 10 },
-		{ id: 3, x: 0, y: 6, xe: 6 },
-		{ id: 4, x: 3, y: 9, ye: 10 },
-		{ id: 2, x: 2, y: 11, xe: 8 },
-		{ id: 2, x: 10, y: 12, xe: 20 },
-		{ id: 6, x: 9, y: 11 },
-		{ id: 6, x: 21, y: 12 },
-		{ id: 4, x: 21, y: 13, ye: 14 },
-		{ id: 5, x: 18, y: 9, ye: 11 },
-		{ id: 2, x: 12, y: 8, xe: 14 },
-		{ id: 2, x: 1, y: 1 },
-		{ id: 2, x: 3, y: 4 },
-		{ id: 2, x: 6, y: 5 },
-		{ id: 10, x: 13, y: 4 }
+		{ id: 1, x: 0, y: 0, xe: 13, ye: 29 },
+		{ id: 1, x: 14, y: 24, xe: 42, ye: 29 },
+		{ id: 1, x: 14, y: 23, xe: 17 },
+		{ id: 0, x: 8, y: 14, xe: 14, ye: 21 },
+		{ id: 3, x: 0, y: 13, xe: 13 },
+		{ id: 4, x: 7, y: 19, ye: 21 },
+		{ id: 2, x: 4, y: 22, xe: 16 },
+		{ id: 2, x: 18, y: 24, xe: 41 },
+		{ id: 6, x: 17, y: 22 },
+		{ id: 4, x: 17, y: 23 },
+		{ id: 6, x: 42, y: 24 },
+		{ id: 4, x: 42, y: 25, ye: 29 },
+		{ id: 5, x: 36, y: 18, ye: 23 },
+		{ id: 2, x: 23, y: 16, xe: 29 },
+		{ id: 2, x: 1, y: 2, xe: 2 },
+		{ id: 2, x: 6, y: 8, xe: 7 },
+		{ id: 2, x: 12, y: 10, xe: 13 },
+		{ id: 10, x: 26, y: 8 },
 	]
 };
 
@@ -133,6 +136,22 @@ tile = [
 	}
 ];
 
+function fireGun(num = 1, cooldown = 6, spread = .05) {
+	this.shoot = this.shoot || {};
+	if (this.shoot.cooldown) {
+		this.shoot.cooldown--;
+		return false;
+	}
+	for (let i = 0; i < num; i++)
+		cSprites.push(new sprite.Bullet(
+			this.pos.x + this.shoot.offset.x,
+			this.pos.y + this.shoot.offset.y,
+			(Math.PI / 2) + (Math.random() - .5) * spread)
+		);
+	this.shoot.cooldown = cooldown;
+	return true;
+}
+
 sprite = {
 	Player: class {
 		constructor(x, y) {
@@ -150,6 +169,9 @@ sprite = {
 				hitboxes: [
 					new sScript.hitbox.Rect(0, 0, 16, 24),
 				],
+			};
+			this.shoot = {
+				offset: { x: 12, y: 12 }
 			};
 			this.scrollState = 0; // 1 is right
 			this.img = [0, 0, 0, 16, 24];
@@ -180,7 +202,7 @@ sprite = {
 				else if (i < ((this.scrollState == -1) ? 184 : 72))
 					this.scroll(-1, 184);
 			}
-			cSprites.push(new sprite.particle.Star(this.pos.x + 4, this.pos.y + 20));
+			if (keyInput.sprint) fireGun.call(this, 1, 6, .05);
 		}
 
 		scroll(state, a) {
@@ -213,11 +235,11 @@ sprite = {
 					right: false
 				},
 				hitboxes: [
-					new sScript.hitbox.Rect(0, 0, 16, 16),
+					new sScript.hitbox.Rect(0, 0, 24, 16),
 				],
 			};
 			this.dir = true; // true = right
-			this.img = [0, 16, 0, 16, 16];
+			this.img = [0, 0, 24, 24, 16];
 		}
 
 		update(sN) {
@@ -230,6 +252,27 @@ sprite = {
 			this.pos = sScript.collide(this.pos);
 			if (this.pos.collisions.right || this.pos.collisions.left)
 				this.dir = !this.dir;
+		}
+	},
+	Bullet: class {
+		constructor(x, y, dir, speed = 3) {
+			this.pos = {
+				x: x,
+				y: y,
+				xv: Math.sin(dir) * speed,
+				yv: Math.cos(dir) * speed,
+			};
+			this.timer = 0;
+			this.img = [0, 32, 0, 8, 8];
+		}
+		update(sN) {
+			this.pos.x += this.pos.xv;
+			this.pos.y += this.pos.yv;
+			if (this.timer >= 500) {
+				cSprites.splice(sN, 1);
+				return;
+			}
+			this.timer++;
 		}
 	},
 	particle: {
