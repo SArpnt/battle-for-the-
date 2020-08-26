@@ -8,7 +8,7 @@ compressedLevel = {
 	assets: [0, 1],
 	sprites: [
 		['Player', 64, 152],
-		['Enemy', 96, 160],
+		['enemy.Spider', 96, 160],
 	],
 	tiles: [
 		{ id: 1, x: 0, y: 0, xe: 13, ye: 29 },
@@ -220,38 +220,40 @@ sprite = {
 		}
 
 	},
-	Enemy: class {
-		constructor(x, y) {
-			this.pos = {
-				x: x,
-				y: y,
-				xv: 0,
-				yv: 0,
-				collisions: {
-					up: false,
-					down: false,
-					left: false,
-					right: false
-				},
-				hitboxes: [
-					new sScript.hitbox.Rect(0, 0, 24, 16),
-				],
-			};
-			this.dir = true; // true = right
-			this.img = [0, 0, 24, 24, 16];
-		}
+	enemy: {
+		Spider: class {
+			constructor(x, y) {
+				this.pos = {
+					x: x,
+					y: y,
+					xv: 0,
+					yv: 0,
+					collisions: {
+						up: false,
+						down: false,
+						left: false,
+						right: false
+					},
+					hitboxes: [
+						new sScript.hitbox.Rect(0, 0, 24, 16),
+					],
+				};
+				this.dir = true; // true = right
+				this.img = [0, 0, 24, 24, 16];
+			}
 
-		update(dt, sN) {
-			this.pos.last = Object.assign({}, this.pos);
-			delete this.pos.last.last;
-			this.pos = sScript.move(this.pos, dt,
-				{ up: false, down: false, left: !this.dir, right: this.dir, sprint: false }
-			);
+			update(dt, sN) {
+				this.pos.last = Object.assign({}, this.pos);
+				delete this.pos.last.last;
+				this.pos = sScript.move(this.pos, dt,
+					{ up: false, down: false, left: !this.dir, right: this.dir, sprint: false }
+				);
 
-			this.pos = sScript.collide(this.pos);
-			if (this.pos.collisions.right || this.pos.collisions.left)
-				this.dir = !this.dir;
-		}
+				this.pos = sScript.collide(this.pos);
+				if (this.pos.collisions.right || this.pos.collisions.left)
+					this.dir = !this.dir;
+			}
+		},
 	},
 	Bullet: class {
 		constructor(x, y, dir, speed = .5) {
